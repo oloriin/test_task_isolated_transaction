@@ -15,7 +15,7 @@ class MainTransactionScriptTest extends TestCase
         $dbPass = 'kjshddfg_32sd';
         $port   = 5434;
         $connect = new \PDO("pgsql:dbname=$dbName;host=$host;port=$port", $dbUser, $dbPass);
-        $connect->query('TRUNCATE collector, events')->execute();
+//        $connect->query('TRUNCATE collector, events')->execute();
 
         $message = json_encode([223, 67, 234]);
 

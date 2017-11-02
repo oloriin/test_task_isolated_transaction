@@ -16,8 +16,8 @@ RUN yes | pecl install xdebug \
     && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.remote_enable=on" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/xdebug.ini
-
-COPY ./conf/ /usr/local/etc/php-fpm.d/
+#
+#COPY ./conf/ /usr/local/etc/php-fpm.d/
 
 CMD /root/init.sh && php-fpm
 #CMD /root/init.sh && /var/www/html/bin/WebSocketServer.php start -d && php-fpm

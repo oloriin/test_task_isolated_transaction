@@ -4,14 +4,16 @@ require __DIR__.'/../src/MainTransactionScript.php';
 
 
 $dbName = 'test';
-$host   = 'localhost';
+$host   = 'testtaskisolatedtransaction_postgres_1';
 $dbUser = 'postgres';
 $dbPass = 'kjshddfg_32sd';
+$pdo = new \PDO("pgsql:dbname=$dbName;host=$host;", $dbUser, $dbPass);
 
-$connect = new PDO("pgsql:dbname=$dbName;host=$host", $dbUser, $dbPass);
 
+$mainTransactionScript = new \TestTaskIsolatedTransaction\MainTransactionScript($pdo);
 
-$mainTransactionScript = new \TestTaskIsolatedTransaction\MainTransactionScript(http_get_request_body(), $connect);
-$response = $mainTransactionScript->execute();
+//$request = new \http\Env\Request();
+$response = $mainTransactionScript->execute(json_encode([23]));
+//$response = $mainTransactionScript->execute($request->getBody());
 
 echo $response;

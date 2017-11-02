@@ -10,6 +10,7 @@ $dbPass = 'kjshddfg_32sd';
 
 $connect = new PDO("pgsql:dbname=$dbName;host=$host", $dbUser, $dbPass);
 
+
 $mainTransactionScript = new \TestTaskIsolatedTransaction\MainTransactionScript(http_get_request_body(), $connect);
 $response = $mainTransactionScript->execute();
 

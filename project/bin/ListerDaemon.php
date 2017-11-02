@@ -8,20 +8,33 @@ $port   = 5434;
 $pdo = new \PDO("pgsql:dbname=$dbName;host=$host;port=$port", $dbUser, $dbPass);
 
 
-$q = $pdo->prepare('SELECT COUNT(token) count FROM events');
-$q->execute();
-$lastEvent = $q->fetch()['count'];
+$query = $pdo->query('
+    SELECT id 
+    FROM events 
+    ORDER BY id DESC 
+    LIMIT 1;
+');
+$query->execute();
+$lastEventId = $query->fetchColumn();
 
-var_dump($lastEvent);
-die();
 while (1) {
-    $q = $connect->query('SELECT * FROM events');
+    $read = false;
+    $query = $pdo->prepare('
+        SELECT id, token, numbers, previous_count 
+        FROM events
+        WHERE id >= ?
+        ORDER BY id ASC 
+    ');
+    $query->execute([$lastEventId]);
 
-    $result = $q->execute();
+    foreach ($query->fetchAll() as $row) {
+        var_dump($row);
+        $lastEventId = $row['id'];
+        $read = true;
+    }
 
-
-    var_dump($result);
-
-    sleep(1);
+    if ($read) {
+       $lastEventId++;
+    }
 
 }

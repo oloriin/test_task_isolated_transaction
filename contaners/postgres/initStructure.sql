@@ -1,27 +1,25 @@
 CREATE TABLE public.collector
 (
   id SERIAL PRIMARY KEY,
-  microtime TIMESTAMP,
   data JSONB
 );
 
 CREATE TABLE public.events
 (
-  token UUID PRIMARY KEY,
-  microtime TIMESTAMP,
+  id SERIAL PRIMARY KEY,
+  token UUID UNIQUE,
   numbers JSONB,
-  row_count INT
+  previous_count INT
 );
 
 CREATE OR REPLACE FUNCTION log_event() RETURNS TRIGGER AS $events$
 BEGIN
 
-  INSERT INTO events (token, microtime, numbers, row_count)
+  INSERT INTO events (token, numbers, previous_count)
     SELECT
       (NEW.data ->> 'token')::UUID as token,
-      NEW.microtime as microtime,
       (NEW.data -> 'numbers') as numbers,
-      (NEW.data ->> 'row_count')::INT as row_count
+      (NEW.data ->> 'previous_count')::INT as previous_count
   ;
   RETURN NULL;
 

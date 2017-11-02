@@ -6,55 +6,56 @@ class MainTransactionScript
     /**
      * @var \PDO
      */
-    private $PDO;
-    /**
-     * @var string
-     */
-    private $startMicroTime;
+    private $pdo;
 
-    public function __construct(\PDO $PDO, string $startMicroTime)
+    public function __construct(\PDO $PDO)
     {
-        $this->PDO = $PDO;
-        $this->startMicroTime = $startMicroTime;
+        $this->pdo = $PDO;
     }
 
     public function execute(string $messageBody)
     {
-        $eventDate = $this->convertMicrotimeToTimestamp($this->startMicroTime);
-
         $message =  json_decode($messageBody);
-        $previousCount = 10;
 
-        $sql = 'INSERT INTO collector (data, microtime)
-VALUES (\'{"token": "A0EEBC99-9C0B-4EF8-BB6D-6BB9BD380A11", "row_count": 1, "numbers": [23, 34, 45]}\',
-        \'2017-11-02 06:48:01.170357\'
-  );';
+        $this->pdo->beginTransaction();
+        //очень общий try
+        try {
+            //Привет фантомное чтение (как вариант собирать все одной процедурой)
+            $sql = 'SELECT COUNT(id) count FROM collector';
+            $query = $this->pdo->query($sql);
+            $query->execute();
+            $previousEventCount = $query->fetch()['count'];
 
+            $valueObject = [
+                'previous_count'=> $previousEventCount,
+                'numbers'       => (array)$message,
+                'token'         => $this->guidv4(random_bytes(16))
+            ];
 
+            $query = $this->pdo->prepare('INSERT INTO collector (data) VALUES (?);');
+            $result = $query->execute([json_encode($valueObject)]);
 
-        $valueObject = [
-            'previousCount' => $previousCount,
-            'numbers'       => (array)$message
-        ];
+            if ($result === true) {
+                $this->pdo->commit();
+                return json_encode([]);
+            } else {
+                $this->pdo->rollBack();
+                echo $query->errorInfo()."\n";
+            }
+        } catch (\Exception $exception) {
+            $this->pdo->rollBack();
+            echo $exception."\n";
+        }
 
-        //$connect->beginTransaction();
-        //
-        //$connect->rollBack();
-        //
-        //$connect->commit();
-
-
-        return json_encode($valueObject);
     }
 
-    private function convertMicrotimeToTimestamp(string $microtime): string
+    private function guidv4($data)
     {
-        list($usec, $sec) = explode(' ', $this->startMicroTime);
-        $usec = round((float)$usec, 6);
-        $usec = str_replace("0.", ".", (string)$usec);
+        assert(strlen($data) == 16);
 
-        $date = date("Y-m-d H:i:s", $sec);
+        $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
+        $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
 
-        return $date.$usec;
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 }

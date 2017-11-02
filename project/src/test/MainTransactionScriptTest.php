@@ -7,28 +7,29 @@ use \TestTaskIsolatedTransaction\MainTransactionScript;
 
 class MainTransactionScriptTest extends TestCase
 {
-    public function testExecute_validMessage_jsonResponse()
+    public function testExecute_validMessage_correctRowInEvents()
     {
-        list($usec, $sec) = explode(' ', microtime());
-        $usec = round((float)$usec, 6);
-        $usec = str_replace("0.", ".", (string)$usec);
-
-        $date = date("Y-m-d H:i:s", $sec);
-        $eventDate = $date.$usec;
-
         $dbName = 'test';
         $host   = 'localhost';
         $dbUser = 'postgres';
         $dbPass = 'kjshddfg_32sd';
         $port   = 5434;
         $connect = new \PDO("pgsql:dbname=$dbName;host=$host;port=$port", $dbUser, $dbPass);
+        $connect->query('TRUNCATE collector, events')->execute();
 
         $message = json_encode([223, 67, 234]);
 
-        $class = new MainTransactionScript($message, $connect);
+        $class = new MainTransactionScript($connect);
 
-        $response = $class->execute();
 
-        $this->assertJson($response);
+        $class->execute($message);
+
+
+        $query = $connect->query('SELECT numbers FROM events LIMIT 1');
+        $query->execute();
+        $resultNumbers = $query->fetchColumn();
+
+        $this->assertJson($resultNumbers);
+        $this->assertSame(json_decode($message), json_decode($resultNumbers));
     }
 }

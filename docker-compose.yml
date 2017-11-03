@@ -2,14 +2,13 @@ version: "2"
 services:
   nginx:
     image: nginx:latest
-#    depends_on:
-#      - fpm
+    depends_on:
+      - php
     ports:
       - 80:80
     volumes:
       - ./logs/nginx:/var/log/nginx
       - ./project:/var/www/html:rw
-#      - ./site.conf:/etc/nginx/conf.d/site.conf
       - ./contaners/nginx/conf/nginx.conf:/etc/nginx/conf.d/default.conf
 #    volumes_from:
 #      - fpm:rw
@@ -18,7 +17,6 @@ services:
       - php
 
   php:
-#    image: php:7-fpm
     build:
       context: ./contaners/fpm
       dockerfile: ./Dockerfile
@@ -41,6 +39,7 @@ services:
       - "5432"
     volumes:
       - ./database/postgres:/data/postgres
+      - ./contaners/postgres/initStructure.sql:/root/initStructure.sql
     ports:
       - 5434:5432
     environment:

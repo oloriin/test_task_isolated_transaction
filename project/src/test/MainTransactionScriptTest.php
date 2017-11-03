@@ -10,7 +10,7 @@ class MainTransactionScriptTest extends TestCase
     public function testExecute_validMessage_correctRowInEvents()
     {
         $dbName = 'test';
-        $host   = 'localhost';
+        $host   = 'testtaskisolatedtransaction_postgres_1';
         $dbUser = 'postgres';
         $dbPass = 'kjshddfg_32sd';
         $port   = 5434;
@@ -25,7 +25,7 @@ class MainTransactionScriptTest extends TestCase
         $class->execute($message);
 
 
-        $query = $connect->query('SELECT numbers FROM events LIMIT 1');
+        $query = $connect->query('SELECT numbers FROM events ORDER BY id DESC LIMIT 1');
         $query->execute();
         $resultNumbers = $query->fetchColumn();
 

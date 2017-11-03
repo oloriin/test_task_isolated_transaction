@@ -3,9 +3,7 @@ namespace TestTaskIsolatedTransaction;
 
 class MainTransactionScript
 {
-    /**
-     * @var \PDO
-     */
+    /** @var \PDO */
     private $pdo;
 
     public function __construct(\PDO $PDO)
@@ -13,12 +11,12 @@ class MainTransactionScript
         $this->pdo = $PDO;
     }
 
-    public function execute(string $messageBody)
+    public function execute(string $messageBody): bool
     {
         $message =  json_decode($messageBody);
 
         $this->pdo->beginTransaction();
-        //очень общий try
+        //очень общий try и Exception
         try {
             //Привет фантомное чтение (как вариант собирать все одной процедурой)
             $sql = 'SELECT COUNT(id) count FROM collector';
@@ -37,14 +35,14 @@ class MainTransactionScript
 
             if ($result === true) {
                 $this->pdo->commit();
-                return json_encode([]);
+                return true;
             } else {
                 $this->pdo->rollBack();
-                echo $query->errorInfo()."\n";
+                throw new \Exception($query->errorInfo());
             }
         } catch (\Exception $exception) {
             $this->pdo->rollBack();
-            echo $exception."\n";
+            throw new \Exception($exception->getMessage());
         }
 
     }

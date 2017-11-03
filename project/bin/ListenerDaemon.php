@@ -1,10 +1,10 @@
 <?php
 
 $dbName = 'test';
-$host   = 'localhost';
+$host   = 'testtaskisolatedtransaction_postgres_1';
 $dbUser = 'postgres';
 $dbPass = 'kjshddfg_32sd';
-$port   = 5434;
+$port   = 5432;
 $pdo = new \PDO("pgsql:dbname=$dbName;host=$host;port=$port", $dbUser, $dbPass);
 
 
@@ -28,7 +28,13 @@ while (1) {
     $query->execute([$lastEventId]);
 
     foreach ($query->fetchAll() as $row) {
-        var_dump($row);
+
+        echo 'Event: '.$row['id']."\n";
+        echo 'Token: '.$row['token']."\n";
+        echo 'Previous row count: '.$row['previous_count']."\n";
+        echo 'Numbers: ['.implode(', ',json_decode($row['numbers']))."]\n";
+        echo "\n";
+//        var_dump($row);
         $lastEventId = $row['id'];
         $read = true;
     }

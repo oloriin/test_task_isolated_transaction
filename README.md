@@ -15,8 +15,8 @@
 
 ### Запуск проекта
 ##### Сборка и запуск сервера
-sudo docker-compose build
-sudo docker-compose up -d
+sudo docker-compose build  
+sudo docker-compose up -d  
 sudo docker exec -ti testtaskisolatedtransaction_postgres_1 psql -U postgres -d test -a -f /root/initStructure.sql
 
 ##### Запуск демона

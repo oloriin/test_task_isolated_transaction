@@ -7,7 +7,6 @@ $dbPass = 'kjshddfg_32sd';
 $port   = 5432;
 $pdo = new \PDO("pgsql:dbname=$dbName;host=$host;port=$port", $dbUser, $dbPass);
 
-
 $query = $pdo->query('
     SELECT id 
     FROM events 
@@ -28,19 +27,17 @@ while (1) {
     $query->execute([$lastEventId]);
 
     foreach ($query->fetchAll() as $row) {
-
-        echo 'Event: '.$row['id']."\n";
-        echo 'Token: '.$row['token']."\n";
-        echo 'Previous row count: '.$row['previous_count']."\n";
-        echo 'Numbers: ['.implode(', ',json_decode($row['numbers']))."]\n";
+        echo 'Event: ' . $row['id']."\n";
+        echo 'Token: ' . $row['token'] . "\n";
+        echo 'Previous row count: ' . $row['previous_count'] . "\n";
+        echo 'Numbers: [' . implode(', ', json_decode($row['numbers'])) . "]\n";
         echo "\n";
-//        var_dump($row);
+
         $lastEventId = $row['id'];
         $read = true;
     }
 
     if ($read) {
-       $lastEventId++;
+        $lastEventId++;
     }
-
 }
